@@ -70,9 +70,6 @@ COPY --from=frontend-build /app/dist /usr/share/nginx/html
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/health || exit 1
 
-# Create health endpoint
-RUN echo 'server { listen 80; location /health { access_log off; return 200 "healthy\n"; add_header Content-Type text/plain; } }' > /etc/nginx/conf.d/health.conf
-
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
