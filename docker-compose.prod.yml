@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-riderdb}
       POSTGRES_USER: ${POSTGRES_USER:-rider}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rider_secure_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-RiderApp2024SecureDBPass!}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,15 +25,15 @@ services:
       dockerfile: Dockerfile
       target: backend
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-rider}:${POSTGRES_PASSWORD:-rider_secure_password}@db:5432/${POSTGRES_DB:-riderdb}
-      - JWT_SECRET=${JWT_SECRET:-your_super_secret_jwt_key_change_in_production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-rider}:${POSTGRES_PASSWORD:-RiderApp2024SecureDBPass!}@db:5432/${POSTGRES_DB:-riderdb}
+      - JWT_SECRET=${JWT_SECRET:-5f8a3d2c9b1e7f4a6e8d3c9b2e5f1a7d8c4b6e9f2a5d8c3b6e1f4a7d9c2b5e8f1a}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
       - AUTO_SEED_ADMIN=${AUTO_SEED_ADMIN:-true}
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-RiderAdmin2024!}
       - ADMIN_NAME=${ADMIN_NAME:-System Admin}
       - PRIME_ADMIN_USERNAME=${PRIME_ADMIN_USERNAME:-primeadmin}
-      - PRIME_ADMIN_PASSWORD=${PRIME_ADMIN_PASSWORD:-primepass123}
+      - PRIME_ADMIN_PASSWORD=${PRIME_ADMIN_PASSWORD:-PrimeAdmin2024!}
       - PRIME_ADMIN_NAME=${PRIME_ADMIN_NAME:-Prime Admin}
     depends_on:
       db:
@@ -42,8 +42,13 @@ services:
     networks:
       - app-network
     labels:
-      - "com.dockploy.project=rider-management"
-      - "com.dockploy.service=backend"
+      - "traefik.enable=true"
+      - "traefik.http.routers.rider-api.rule=Host(`riderapp.johnsonzoglo.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.rider-api.tls=true"
+      - "traefik.http.routers.rider-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.rider-api.middlewares=rider-api-stripprefix"
+      - "traefik.http.middlewares.rider-api-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.services.rider-api.loadbalancer.server.port=8000"
 
   frontend:
     build:
@@ -51,48 +56,19 @@ services:
       dockerfile: Dockerfile
       target: frontend
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://riderapp.johnsonzoglo.com/api}
+        VITE_API_BASE_URL: https://riderapp.johnsonzoglo.com/api
     depends_on:
       - backend
     restart: unless-stopped
     networks:
       - app-network
     labels:
-      - "com.dockploy.project=rider-management"
-      - "com.dockploy.service=frontend"
       - "traefik.enable=true"
-      - "traefik.http.routers.rider-frontend.rule=Host(`${DOMAIN:-riderapp.johnsonzoglo.com}`)"
+      - "traefik.http.routers.rider-frontend.rule=Host(`riderapp.johnsonzoglo.com`)"
+      - "traefik.http.routers.rider-frontend.priority=1"
       - "traefik.http.routers.rider-frontend.tls=true"
       - "traefik.http.routers.rider-frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.rider-frontend.loadbalancer.server.port=80"
-      
-      # API routing
-      - "traefik.http.routers.rider-api.rule=Host(`${DOMAIN:-riderapp.johnsonzoglo.com}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.rider-api.tls=true"
-      - "traefik.http.routers.rider-api.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.rider-api.middlewares=api-stripprefix"
-      - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api"
-
-  # Reverse proxy for API
-  api-proxy:
-    image: nginx:alpine
-    volumes:
-      - ./nginx-api.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - backend
-    restart: unless-stopped
-    networks:
-      - app-network
-    labels:
-      - "com.dockploy.project=rider-management"
-      - "com.dockploy.service=api"
-      - "traefik.enable=true"
-      - "traefik.http.routers.rider-api-proxy.rule=Host(`${DOMAIN:-riderapp.johnsonzoglo.com}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.rider-api-proxy.tls=true"
-      - "traefik.http.routers.rider-api-proxy.tls.certresolver=letsencrypt"
-      - "traefik.http.services.rider-api-proxy.loadbalancer.server.port=80"
-      - "traefik.http.routers.rider-api-proxy.middlewares=api-stripprefix"
-      - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api"
 
 volumes:
   postgres_data:
