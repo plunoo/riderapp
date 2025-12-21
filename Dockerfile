@@ -25,12 +25,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY backend/app ./
 
-# Create non-root user
-RUN addgroup --system app && adduser --system --ingroup app app \
-    && chown -R app:app /app
-
-USER app
-
 EXPOSE 8000
 
 # Health check
