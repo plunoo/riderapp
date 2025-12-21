@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: riderdb
+      POSTGRES_USER: rider
+      POSTGRES_PASSWORD: riderpass
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rider -d riderdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://rider:riderpass@db:5432/riderdb}
+      JWT_SECRET: ${JWT_SECRET:-change_me}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      AUTO_SEED_ADMIN: ${AUTO_SEED_ADMIN:-true}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_NAME: ${ADMIN_NAME:-System Admin}
+      PRIME_ADMIN_USERNAME: ${PRIME_ADMIN_USERNAME:-primeadmin}
+      PRIME_ADMIN_PASSWORD: ${PRIME_ADMIN_PASSWORD:-primepass123}
+      PRIME_ADMIN_NAME: ${PRIME_ADMIN_NAME:-Prime Admin}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+      args:
+        # Build-time API base URL for the frontend
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:
