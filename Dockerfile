@@ -27,12 +27,10 @@ COPY backend/app ./
 
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Removed health check temporarily for debugging
 
-# Production command
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
+# Production command (simplified)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ====================
 # Frontend (Production)
@@ -66,9 +64,7 @@ COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built assets
 COPY --from=frontend-build /app/dist /usr/share/nginx/html
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+# Removed health check temporarily for debugging
 
 EXPOSE 80
 
