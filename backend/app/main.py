@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from passlib.hash import bcrypt
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
@@ -86,7 +85,7 @@ def seed_prime_admin():
             username=PRIME_ADMIN_USERNAME,
             name=PRIME_ADMIN_NAME or PRIME_ADMIN_USERNAME,
             role="prime_admin",
-            password=bcrypt.hash(PRIME_ADMIN_PASSWORD),
+            password=PRIME_ADMIN_PASSWORD,
             is_active=True,
         )
         db.add(prime)
@@ -114,7 +113,7 @@ def seed_default_admin():
             username=ADMIN_USERNAME,
             name=ADMIN_NAME or ADMIN_USERNAME,
             role="sub_admin",
-            password=bcrypt.hash(ADMIN_PASSWORD),
+            password=ADMIN_PASSWORD,
             is_active=True,
             manager_id=prime.id if prime else None,
         )
