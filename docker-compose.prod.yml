@@ -24,16 +24,18 @@ services:
       context: .
       dockerfile: Dockerfile
       target: backend
+    ports:
+      - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-rider}:${POSTGRES_PASSWORD:-RiderApp2024SecureDBPass!}@db:5432/${POSTGRES_DB:-riderdb}
-      - JWT_SECRET=${JWT_SECRET:-5f8a3d2c9b1e7f4a6e8d3c9b2e5f1a7d8c4b6e9f2a5d8c3b6e1f4a7d9c2b5e8f1a}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-rider}:${POSTGRES_PASSWORD:-RiderProd2024SecurePass!}@db:5432/${POSTGRES_DB:-riderdb}
+      - JWT_SECRET=${JWT_SECRET:-4a933f56ed046fa97167ef63d69112c677b20d314d737170ffa22dee48554125}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
       - AUTO_SEED_ADMIN=${AUTO_SEED_ADMIN:-true}
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-RiderAdmin2024!}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-123456789}
       - ADMIN_NAME=${ADMIN_NAME:-System Admin}
       - PRIME_ADMIN_USERNAME=${PRIME_ADMIN_USERNAME:-primeadmin}
-      - PRIME_ADMIN_PASSWORD=${PRIME_ADMIN_PASSWORD:-PrimeAdmin2024!}
+      - PRIME_ADMIN_PASSWORD=${PRIME_ADMIN_PASSWORD:-123456789}
       - PRIME_ADMIN_NAME=${PRIME_ADMIN_NAME:-Prime Admin}
     depends_on:
       db:
@@ -57,6 +59,8 @@ services:
       target: frontend
       args:
         VITE_API_BASE_URL: https://riderapp.johnsonzoglo.com/api
+    ports:
+      - "80:80"
     depends_on:
       - backend
     restart: unless-stopped
