@@ -35,33 +35,12 @@ async def health_check():
     return {"status": "healthy", "service": "rider-management-api"}
 
 
-@app.get("/debug-env")
-async def debug_env():
-    """Debug endpoint to check environment variables"""
-    import os
-    return {
-        "AUTO_SEED_ADMIN": os.getenv("AUTO_SEED_ADMIN"),
-        "ADMIN_USERNAME": os.getenv("ADMIN_USERNAME"),
-        "ADMIN_PASSWORD": "***" if os.getenv("ADMIN_PASSWORD") else None,
-        "PRIME_ADMIN_USERNAME": os.getenv("PRIME_ADMIN_USERNAME"),
-        "PRIME_ADMIN_PASSWORD": "***" if os.getenv("PRIME_ADMIN_PASSWORD") else None,
-    }
-
-@app.post("/setup-admin")
-async def setup_admin():
-    """Emergency endpoint to create admin users if they don't exist"""
+@app.post("/create-admin")
+async def create_admin():
+    """Create admin users manually"""
     db: Session = SessionLocal()
     try:
-        # First, try to alter the table to allow NULL store values
-        try:
-            db.execute(text("ALTER TABLE users ALTER COLUMN store DROP NOT NULL"))
-            db.commit()
-            print("[setup] Removed NOT NULL constraint from store column")
-        except Exception as alter_e:
-            print(f"[setup] Could not alter table (may already be done): {alter_e}")
-            db.rollback()
-        
-        # Create prime admin
+        # Create prime admin if doesn't exist
         prime_admin = db.query(User).filter(User.username == "primeadmin").first()
         if not prime_admin:
             prime_admin = User(
@@ -69,22 +48,22 @@ async def setup_admin():
                 name="Prime Admin",
                 role="prime_admin",
                 password="123456789",
-                store="admin",  # Use "admin" as store for admin users
+                store="admin",
                 is_active=True,
             )
             db.add(prime_admin)
             db.commit()
             db.refresh(prime_admin)
         
-        # Create admin
+        # Create sub admin if doesn't exist
         admin = db.query(User).filter(User.username == "admin").first()
         if not admin:
             admin = User(
                 username="admin",
-                name="System Admin",
+                name="System Admin", 
                 role="sub_admin",
                 password="123456789",
-                store="admin",  # Use "admin" as store for admin users
+                store="admin",
                 is_active=True,
                 manager_id=prime_admin.id,
             )
@@ -92,16 +71,13 @@ async def setup_admin():
             db.commit()
         
         return {
-            "status": "success", 
+            "success": True,
             "message": "Admin users created successfully",
-            "users": [
-                {"username": "primeadmin", "role": "prime_admin"},
-                {"username": "admin", "role": "sub_admin"}
-            ]
+            "users": ["primeadmin", "admin"]
         }
     except Exception as e:
         db.rollback()
-        return {"status": "error", "message": str(e)}
+        return {"success": False, "error": str(e)}
     finally:
         db.close()
 
@@ -157,7 +133,7 @@ def seed_prime_admin():
             name=PRIME_ADMIN_NAME or PRIME_ADMIN_USERNAME,
             role="prime_admin",
             password=PRIME_ADMIN_PASSWORD,
-            store="",  # Empty string for admins
+            store="admin",
             is_active=True,
         )
         db.add(prime)
@@ -186,7 +162,7 @@ def seed_default_admin():
             name=ADMIN_NAME or ADMIN_USERNAME,
             role="sub_admin",
             password=ADMIN_PASSWORD,
-            store="",  # Empty string for admins
+            store="admin",
             is_active=True,
             manager_id=prime.id if prime else None,
         )
