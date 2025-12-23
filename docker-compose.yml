@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:15
@@ -29,10 +27,10 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
       AUTO_SEED_ADMIN: ${AUTO_SEED_ADMIN:-true}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123456789}
       ADMIN_NAME: ${ADMIN_NAME:-System Admin}
       PRIME_ADMIN_USERNAME: ${PRIME_ADMIN_USERNAME:-primeadmin}
-      PRIME_ADMIN_PASSWORD: ${PRIME_ADMIN_PASSWORD:-primepass123}
+      PRIME_ADMIN_PASSWORD: ${PRIME_ADMIN_PASSWORD:-123456789}
       PRIME_ADMIN_NAME: ${PRIME_ADMIN_NAME:-Prime Admin}
     ports:
       - "8000:8000"
@@ -47,12 +45,23 @@ services:
       dockerfile: Dockerfile
       target: frontend
       args:
-        # Build-time API base URL for the frontend
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
     ports:
       - "5173:80"
     depends_on:
       - backend
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@rider.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
     restart: unless-stopped
 
 volumes:

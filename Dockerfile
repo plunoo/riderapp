@@ -19,18 +19,18 @@ RUN apt-get update \
 WORKDIR /app
 
 # Install Python dependencies
-COPY backend/app/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/app/requirements.txt ./app/
+RUN pip install --no-cache-dir -r ./app/requirements.txt
 
 # Copy application code
-COPY backend/app ./
+COPY backend/app ./app
 
 EXPOSE 8000
 
 # Removed health check temporarily for debugging
 
 # Production command (simplified)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ====================
 # Frontend (Production)
