@@ -1,0 +1,53 @@
+{
+  "name": "rider-management-system",
+  "description": "Comprehensive rider management system for delivery companies",
+  "framework": "docker-compose",
+  "buildPath": "./docker-compose.prod.yml",
+  "ports": [
+    {
+      "publishedPort": 80,
+      "targetPort": 80,
+      "protocol": "tcp"
+    },
+    {
+      "publishedPort": 8000,
+      "targetPort": 8000,
+      "protocol": "tcp"
+    }
+  ],
+  "environment": {
+    "NODE_ENV": "production",
+    "POSTGRES_DB": "riderdb",
+    "POSTGRES_USER": "rider",
+    "JWT_SECRET": "your_production_jwt_secret_here_change_this",
+    "ACCESS_TOKEN_EXPIRE_MINUTES": "1440",
+    "AUTO_SEED_ADMIN": "true",
+    "ADMIN_USERNAME": "admin",
+    "ADMIN_PASSWORD": "123456789",
+    "ADMIN_NAME": "System Admin",
+    "PRIME_ADMIN_USERNAME": "primeadmin",
+    "PRIME_ADMIN_PASSWORD": "123456789",
+    "PRIME_ADMIN_NAME": "Prime Admin"
+  },
+  "domains": [
+    {
+      "host": "riderapp.johnsonzoglo.com",
+      "port": 80,
+      "https": true,
+      "certificateType": "letsencrypt"
+    }
+  ],
+  "healthcheck": {
+    "enabled": true,
+    "path": "/health",
+    "port": 8000,
+    "initialDelaySeconds": 30,
+    "intervalSeconds": 30
+  },
+  "volumes": [
+    {
+      "name": "postgres_data",
+      "mountPath": "/var/lib/postgresql/data"
+    }
+  ]
+}

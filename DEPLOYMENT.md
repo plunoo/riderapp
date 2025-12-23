@@ -1,14 +1,17 @@
-# 🚀 Rider Management System - Dockploy Deployment Guide
+# 🚀 Dokploy Deployment Guide - Rider Management System
 
-## 📋 Overview
+## 📋 Quick Deploy Summary
 
-This guide will help you deploy the Rider Management System on Dockploy with PostgreSQL database, FastAPI backend, and React frontend.
+✅ **Production-ready configuration completed**
+✅ **Domain configured**: riderapp.johnsonzoglo.com  
+✅ **Nginx reverse proxy setup**
+✅ **Docker Compose optimized for Dokploy**
 
 ## 🔧 Prerequisites
 
-- Dockploy server with Docker and Docker Compose
-- Domain name pointing to your server
-- SSL certificate (automatically handled by Traefik/Let's Encrypt)
+- Dokploy server running
+- Domain `riderapp.johnsonzoglo.com` pointed to your server
+- Git repository access
 
 ## 📁 Project Structure
 
