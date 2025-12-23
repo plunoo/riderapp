@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import "./Login.css";
@@ -10,15 +10,31 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"admin" | "rider">("admin");
   const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Auto-fill credentials for demo/testing
+    if (mode === "admin") {
+      setUsername("admin");
+      setPassword("123456789");
+    } else {
+      setUsername("");
+      setPassword("");
+    }
+  }, [mode]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
+    setLoading(true);
+    
     try {
       const u = await login(username, password);
       nav(u.role === "rider" ? "/rider" : "/admin");
     } catch (e: any) {
       setErr(e?.response?.data?.detail || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,8 +133,8 @@ export default function Login() {
 
             {err && <div className="alert">{err}</div>}
 
-            <button className="primary-btn" type="submit">
-              Login
+            <button className="primary-btn" type="submit" disabled={loading}>
+              {loading ? "Signing in..." : "Login"}
             </button>
             <button className="link-btn" type="button">
               Forgot Password?

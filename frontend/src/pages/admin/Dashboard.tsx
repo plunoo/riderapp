@@ -44,8 +44,9 @@ export default function Dashboard() {
   const [primeOverview, setPrimeOverview] = useState<PrimeOverview | null>(null);
   const [selectedStore, setSelectedStore] = useState<string>("all");
   const [impLogs, setImpLogs] = useState<ImpLog[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -69,8 +70,10 @@ export default function Dashboard() {
       if (isPrime && logsRes) {
         setImpLogs(logsRes.data.items || []);
       }
+      setLastUpdate(new Date());
     } catch (e: any) {
       setErr(e?.response?.data?.detail || "Failed to load dashboard data");
+      console.error("Dashboard load error:", e);
     } finally {
       setLoading(false);
     }
@@ -121,16 +124,21 @@ export default function Dashboard() {
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <Topbar title="Command Center" />
 
+      {loading && !summary && <div style={loadingCard}>Loading dashboard data...</div>}
+      
       <div style={hero}>
         <div>
-          <div style={pill}>Live Ops</div>
+          <div style={pill}>
+            <span style={{...statusDot, background: loading ? "#f59e0b" : "#22c55e"}} />
+            Live Ops
+          </div>
           <h2 style={{ margin: "10px 0 6px 0" }}>Today's rider pulse</h2>
           <p style={{ margin: 0, opacity: 0.75 }}>Monitor live capacity, deliveries, and incidents in one view.</p>
         </div>
         <div style={heroBadge}>
           <span style={{ fontSize: 26, fontWeight: 800 }}>{summary ? `${summary.active || 0}/${summary.total_riders || 0}` : "--"}</span>
           <span style={{ fontSize: 13, opacity: 0.8 }}>Active / Total</span>
-          {summary?.updated_at && <span style={{ fontSize: 11, opacity: 0.65 }}>Updated {new Date(summary.updated_at).toLocaleTimeString()}</span>}
+          {lastUpdate && <span style={{ fontSize: 11, opacity: 0.65 }}>Updated {lastUpdate.toLocaleTimeString()}</span>}
         </div>
         {isPrime && (
           <select
@@ -428,4 +436,21 @@ const empty: React.CSSProperties = {
   borderRadius: 10,
   textAlign: "center",
   color: "#6b7280",
+};
+
+const loadingCard: React.CSSProperties = {
+  padding: "12px 16px",
+  borderRadius: 12,
+  background: "#f3f4f6",
+  color: "#374151",
+  textAlign: "center",
+  fontWeight: 600,
+};
+
+const statusDot: React.CSSProperties = {
+  width: 8,
+  height: 8,
+  borderRadius: "50%",
+  display: "inline-block",
+  marginRight: 6,
 };

@@ -26,9 +26,9 @@ class User(Base):
     password = Column(String(255), nullable=False)
     name = Column(String(100), nullable=False)
     role = Column(String(20), nullable=False)  # prime_admin | sub_admin | admin | rider
-    store = Column(String(100), nullable=False)  # store/group name
+    store = Column(String(100), nullable=True)  # store/group name (nullable for admins)
     manager_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True, nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
