@@ -35,6 +35,18 @@ async def health_check():
     return {"status": "healthy", "service": "rider-management-api"}
 
 
+@app.get("/debug-env")
+async def debug_env():
+    """Debug endpoint to check environment variables"""
+    import os
+    return {
+        "AUTO_SEED_ADMIN": os.getenv("AUTO_SEED_ADMIN"),
+        "ADMIN_USERNAME": os.getenv("ADMIN_USERNAME"),
+        "ADMIN_PASSWORD": "***" if os.getenv("ADMIN_PASSWORD") else None,
+        "PRIME_ADMIN_USERNAME": os.getenv("PRIME_ADMIN_USERNAME"),
+        "PRIME_ADMIN_PASSWORD": "***" if os.getenv("PRIME_ADMIN_PASSWORD") else None,
+    }
+
 @app.post("/setup-admin")
 async def setup_admin():
     """Emergency endpoint to create admin users if they don't exist"""
