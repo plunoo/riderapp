@@ -3,18 +3,14 @@
   "description": "Comprehensive rider management system for delivery companies",
   "framework": "docker-compose",
   "buildPath": "./docker-compose.prod.yml",
-  "ports": [
-    {
-      "publishedPort": 3000,
-      "targetPort": 80,
-      "protocol": "tcp"
+  "services": {
+    "frontend": {
+      "internalPort": 80
     },
-    {
-      "publishedPort": 8001,
-      "targetPort": 8000,
-      "protocol": "tcp"
+    "backend": {
+      "internalPort": 8000
     }
-  ],
+  },
   "environment": {
     "NODE_ENV": "production",
     "POSTGRES_DB": "riderdb",
@@ -32,7 +28,7 @@
   "domains": [
     {
       "host": "riderapp.johnsonzoglo.com",
-      "port": 3000,
+      "service": "frontend",
       "https": true,
       "certificateType": "letsencrypt"
     }
@@ -40,7 +36,7 @@
   "healthcheck": {
     "enabled": true,
     "path": "/health",
-    "port": 8001,
+    "service": "frontend",
     "initialDelaySeconds": 30,
     "intervalSeconds": 30
   },

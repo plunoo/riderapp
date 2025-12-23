@@ -24,8 +24,6 @@ services:
       context: .
       dockerfile: Dockerfile
       target: backend
-    ports:
-      - "8001:8000"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-rider}:${POSTGRES_PASSWORD:-RiderProd2024SecurePass!}@db:5432/${POSTGRES_DB:-riderdb}
       - JWT_SECRET=${JWT_SECRET:-4a933f56ed046fa97167ef63d69112c677b20d314d737170ffa22dee48554125}
@@ -51,8 +49,6 @@ services:
       target: frontend
       args:
         VITE_API_BASE_URL: https://riderapp.johnsonzoglo.com/api
-    ports:
-      - "3000:80"
     depends_on:
       - backend
     restart: unless-stopped
