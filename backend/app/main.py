@@ -52,6 +52,15 @@ async def setup_admin():
     """Emergency endpoint to create admin users if they don't exist"""
     db: Session = SessionLocal()
     try:
+        # First, try to alter the table to allow NULL store values
+        try:
+            db.execute(text("ALTER TABLE users ALTER COLUMN store DROP NOT NULL"))
+            db.commit()
+            print("[setup] Removed NOT NULL constraint from store column")
+        except Exception as alter_e:
+            print(f"[setup] Could not alter table (may already be done): {alter_e}")
+            db.rollback()
+        
         # Create prime admin
         prime_admin = db.query(User).filter(User.username == "primeadmin").first()
         if not prime_admin:
@@ -60,7 +69,7 @@ async def setup_admin():
                 name="Prime Admin",
                 role="prime_admin",
                 password="123456789",
-                store="",  # Empty string for admins
+                store="admin",  # Use "admin" as store for admin users
                 is_active=True,
             )
             db.add(prime_admin)
@@ -75,15 +84,23 @@ async def setup_admin():
                 name="System Admin",
                 role="sub_admin",
                 password="123456789",
-                store="",  # Empty string for admins
+                store="admin",  # Use "admin" as store for admin users
                 is_active=True,
                 manager_id=prime_admin.id,
             )
             db.add(admin)
             db.commit()
         
-        return {"status": "success", "message": "Admin users created successfully"}
+        return {
+            "status": "success", 
+            "message": "Admin users created successfully",
+            "users": [
+                {"username": "primeadmin", "role": "prime_admin"},
+                {"username": "admin", "role": "sub_admin"}
+            ]
+        }
     except Exception as e:
+        db.rollback()
         return {"status": "error", "message": str(e)}
     finally:
         db.close()
