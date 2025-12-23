@@ -17,7 +17,12 @@ from app.database import Base, SessionLocal, engine
 from app.models import User
 from app.routers import admin, attendance, riders, shifts, tracking
 
-app = FastAPI(title="Rider Management API", version="1.0.0")
+app = FastAPI(
+    title="Rider Management API", 
+    version="1.0.0",
+    openapi_version="3.1.0",
+    description="Comprehensive rider management system for delivery companies with real-time tracking, attendance management, and hierarchical admin controls."
+)
 
 # CORS configuration for production
 app.add_middleware(
