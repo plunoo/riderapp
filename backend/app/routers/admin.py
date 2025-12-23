@@ -27,12 +27,16 @@ def add_rider(
     """
     manager_id = None
     if admin.role == "prime_admin":
-        manager_id = data.get("sub_admin_id")
-        if not manager_id:
-            raise HTTPException(status_code=400, detail="sub_admin_id is required for prime admin")
-        sub_admin = db.query(User).filter(User.id == manager_id, User.role == "sub_admin").first()
-        if not sub_admin:
-            raise HTTPException(status_code=404, detail="Sub admin not found")
+        # Prime admin can optionally assign to a sub admin, or directly manage
+        sub_admin_id = data.get("sub_admin_id")
+        if sub_admin_id:
+            sub_admin = db.query(User).filter(User.id == sub_admin_id, User.role == "sub_admin").first()
+            if not sub_admin:
+                raise HTTPException(status_code=404, detail="Sub admin not found")
+            manager_id = sub_admin.id
+        else:
+            # If no sub_admin_id provided, prime admin manages directly
+            manager_id = admin.id
     else:
         manager_id = admin.id
 
@@ -42,13 +46,18 @@ def add_rider(
     if db.query(User).filter(User.username == data["username"]).first():
         raise HTTPException(status_code=400, detail="Username already exists")
 
+    # Validate required fields
+    if not data.get("password"):
+        raise HTTPException(status_code=400, detail="Password is required")
+    
     rider = User(
         username=data["username"],
         name=data["name"],
         store=data.get("store"),
         role="rider",
         manager_id=manager_id,
-        password=bcrypt.hash(data["password"])
+        password=data["password"],  # Use plain text password (as in main.py)
+        is_active=True
     )
     db.add(rider)
     db.commit()
