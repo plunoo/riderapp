@@ -35,6 +35,46 @@ async def health_check():
     return {"status": "healthy", "service": "rider-management-api"}
 
 
+@app.post("/setup-admin")
+async def setup_admin():
+    """Emergency endpoint to create admin users if they don't exist"""
+    db: Session = SessionLocal()
+    try:
+        # Create prime admin
+        prime_admin = db.query(User).filter(User.username == "primeadmin").first()
+        if not prime_admin:
+            prime_admin = User(
+                username="primeadmin",
+                name="Prime Admin",
+                role="prime_admin",
+                password="123456789",
+                is_active=True,
+            )
+            db.add(prime_admin)
+            db.commit()
+            db.refresh(prime_admin)
+        
+        # Create admin
+        admin = db.query(User).filter(User.username == "admin").first()
+        if not admin:
+            admin = User(
+                username="admin",
+                name="System Admin",
+                role="sub_admin",
+                password="123456789",
+                is_active=True,
+                manager_id=prime_admin.id,
+            )
+            db.add(admin)
+            db.commit()
+        
+        return {"status": "success", "message": "Admin users created successfully"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        db.close()
+
+
 @app.on_event("startup")
 def on_startup():
     try:
