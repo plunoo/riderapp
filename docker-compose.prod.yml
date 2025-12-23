@@ -43,14 +43,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.rider-api.rule=Host(`riderapp.johnsonzoglo.com`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.rider-api.tls=true"
-      - "traefik.http.routers.rider-api.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.rider-api.middlewares=rider-api-stripprefix"
-      - "traefik.http.middlewares.rider-api-stripprefix.stripprefix.prefixes=/api"
-      - "traefik.http.services.rider-api.loadbalancer.server.port=8000"
 
   frontend:
     build:
@@ -66,13 +58,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.rider-frontend.rule=Host(`riderapp.johnsonzoglo.com`)"
-      - "traefik.http.routers.rider-frontend.priority=1"
-      - "traefik.http.routers.rider-frontend.tls=true"
-      - "traefik.http.routers.rider-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.rider-frontend.loadbalancer.server.port=80"
 
 volumes:
   postgres_data:
