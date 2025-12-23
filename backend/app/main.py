@@ -60,6 +60,7 @@ async def setup_admin():
                 name="Prime Admin",
                 role="prime_admin",
                 password="123456789",
+                store="",  # Empty string for admins
                 is_active=True,
             )
             db.add(prime_admin)
@@ -74,6 +75,7 @@ async def setup_admin():
                 name="System Admin",
                 role="sub_admin",
                 password="123456789",
+                store="",  # Empty string for admins
                 is_active=True,
                 manager_id=prime_admin.id,
             )
@@ -138,6 +140,7 @@ def seed_prime_admin():
             name=PRIME_ADMIN_NAME or PRIME_ADMIN_USERNAME,
             role="prime_admin",
             password=PRIME_ADMIN_PASSWORD,
+            store="",  # Empty string for admins
             is_active=True,
         )
         db.add(prime)
@@ -166,6 +169,7 @@ def seed_default_admin():
             name=ADMIN_NAME or ADMIN_USERNAME,
             role="sub_admin",
             password=ADMIN_PASSWORD,
+            store="",  # Empty string for admins
             is_active=True,
             manager_id=prime.id if prime else None,
         )
